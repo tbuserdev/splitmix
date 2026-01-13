@@ -1,11 +1,14 @@
-version: "3.8"
-
 services:
   splitmix:
-    build: .
+    image: splitmix:1.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: splitmix
     ports:
       - "8501:8501"
+    volumes:
+      - ./data:/app/data
     restart: unless-stopped
     environment:
       - STREAMLIT_SERVER_HEADLESS=true
