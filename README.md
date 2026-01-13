@@ -126,11 +126,24 @@ HH:MM:SS - Track Name
 
 ## Docker Deployment
 
-### Using Docker Compose (Recommended)
+### Using Pre-built Image from GitHub Container Registry (Recommended)
+
+```bash
+# Pull and run using docker-compose
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or pull and run directly
+docker pull ghcr.io/tbuserdev/splitmix:latest
+docker run -d -p 8501:8501 --name splitmix ghcr.io/tbuserdev/splitmix:latest
+```
+
+**Note**: The image is automatically built and pushed to GitHub Container Registry on every push to the `main` branch.
+
+### Using Docker Compose (Build Locally)
 
 ```bash
 # Start the service
-docker-compose up -d
+docker-compose -f docker-compose.local.yml up -d
 
 # View logs
 docker-compose logs -f
