@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Project specific
+data/
+output_tracks/
+*.wav
+*.mp3
+*.m4a
+*.webm
+*.jpg
+*.jpeg
+*.png
+*.avif
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+PLAN.md
+README.md
+timestamps.txt
+
+# Test files
+input.wav
+cover.jpg
+cover.avif

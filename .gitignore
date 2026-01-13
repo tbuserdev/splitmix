@@ -229,3 +229,9 @@ timestamps.txt
 
 # MacOS
 .DS_Store
+
+# SplitMix specific
+data/
+output_tracks/
+metadata.json
+custom_cover.jpg

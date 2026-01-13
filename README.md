@@ -1,67 +1,244 @@
-### **Prerequisites**
+# SplitMix 🎵
 
-1. **Python:** You need Python installed on your system.
+Download and split YouTube audio into tagged MP3 tracks with metadata and cover art.
 
-2. **FFmpeg:** This is a crucial dependency for `pydub` to work correctly. You must install it and ensure it's accessible from your system's command line (i.e., it's in your PATH).
+## Features
 
-   * **Windows:** Download from the [official FFmpeg website](https://ffmpeg.org/download.html) and add the `bin` folder to your system's PATH.
+- Download audio from YouTube videos (DJ sets, mixes, live sets, etc.)
+- Automatically extract video thumbnail as cover art
+- Web-based interface with Streamlit
+- Split audio into individual tracks based on timestamps
+- Add ID3 metadata (artist, album, title, track number)
+- Embed cover art into each track
+- Export as high-quality 320kbps MP3 files
+- Download all tracks as a ZIP file
+- Docker support for easy deployment
 
-   * **macOS (using Homebrew):** `brew install ffmpeg`
+## Prerequisites
 
-   * **Linux (using apt):** `sudo apt update && sudo apt install ffmpeg`
+### Local Development
 
-3. **Python Libraries:** You need to install `pydub` and `mutagen`.
+1. **Python 3.11+** installed on your system
 
-### **Setup Instructions**
+2. **FFmpeg** - Required for audio processing
+   - **macOS**: `brew install ffmpeg`
+   - **Linux**: `sudo apt update && sudo apt install ffmpeg`
+   - **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
 
-1. **Save the Files:** Save the three files I generated (`wav_splitter.py`, `requirements.txt`, and `timestamps.txt`) into the same folder on your computer.
+3. **uv** (recommended) or pip for dependency management
+   - Install uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. **Install Libraries:** Open your terminal or command prompt, navigate to that folder, and run this command:
+### Docker
 
-```bash
-pip install -r requirements.txt
-```
+- Docker and Docker Compose installed
 
-3. **Prepare Your Files:**
+## Installation
 
-* Place the large `.wav` file you want to split into the same folder.
-
-* (Optional) Place a cover image (e.g., `cover.jpg`) in the folder if you want to add album art.
-
-* Verify the `timestamps.txt` file contains the correct tracklist.
-
-
-### **How to Run the Script**
-
-You will run the script from your terminal or command prompt.
-
-1. Navigate to the directory where you saved the files.
-
-2. Activate your Python environment: 
-   * On Windows: `venv\Scripts\activate`
-   * On macOS/Linux: `source .venv/bin/activate`
-
-3. Use the following command structure:
+### Local Development
 
 ```bash
-python wav_splitter.py "input.flac" --artist "Artist Name" --album "Album Name" --tracklist "timestamps.txt"
+# Clone the repository
+git clone <your-repo-url>
+cd splitmix
+
+# Install dependencies using uv
+uv sync
+
+# Or using pip
+pip install pydub mutagen streamlit yt-dlp
 ```
 
-#### **Example Command:**
-
-Let's say your audio file is named `live_set.wav`, the artist is `Fred again..`, and the album is `Boiler Room`. You would run:
+### Docker
 
 ```bash
-python main.py "input.wav" --artist "Kaytranada" --album "Elevator Music" --tracklist "timestamps.txt" --cover "cover.jpg"
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Access at http://localhost:8501
 ```
 
+## Usage
 
-#### **To Add Album Art:**
+### Web Interface (Recommended)
 
-If you have a `cover.jpg` file you want to use, add the `--cover` flag:
+1. **Start the application**
+   ```bash
+   # Local development
+   uv run streamlit run app.py
+   
+   # Or with Docker
+   docker-compose up -d
+   ```
+
+2. **Open your browser** to `http://localhost:8501`
+
+3. **Follow the steps in the UI:**
+   - Paste a YouTube URL
+   - Click "Download Audio & Thumbnail"
+   - Edit the Artist and Album names (auto-filled from video title)
+   - Paste timestamps in the format:
+     ```
+     00:00 - Track 1 Name
+     03:24 - Track 2 Name
+     07:15 - Track 3 Name
+     ```
+   - Click "Split Tracks"
+   - Download the ZIP file with all tracks
+   - Optionally delete all files to clean up
+
+### Command Line Interface
+
+The original CLI is still available:
 
 ```bash
-python3 main.py "input.wav" --artist "Sam Gellaitry" --album "Elevator Music" --tracklist "timestamps.txt" --cover "cover.jpg"
+python main.py "input.wav" \
+  --artist "Artist Name" \
+  --album "Album Name" \
+  --tracklist "timestamps.txt" \
+  --cover "cover.jpg"
 ```
 
-After running, the script will create a new folder named `output_tracks` (or a custom name if you specify one) containing all the split `.mp3` files, correctly named and tagged.
+**Arguments:**
+- `source_file` - Path to audio file (WAV, MP3, M4A, etc.)
+- `--artist` - Artist name for metadata
+- `--album` - Album name for metadata
+- `--tracklist` - Path to text file with timestamps
+- `--cover` - (Optional) Path to cover image (JPG, PNG)
+- `--output_dir` - (Optional) Output directory (default: `output_tracks`)
+
+## Timestamp Format
+
+Timestamps should be in one of these formats:
+
+```
+MM:SS - Track Name
+HH:MM:SS - Track Name
+```
+
+**Example:**
+```
+00:00 - LIGHTNING
+03:01 - NERVOUS
+06:41 - CURIOUS
+09:43 - Unreleased #1
+11:12 - Proper Education (Eric Prydz, Floyd)
+```
+
+## Docker Deployment
+
+### Using Docker Compose (Recommended)
+
+```bash
+# Start the service
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the service
+docker-compose down
+```
+
+### Using Docker directly
+
+```bash
+# Build the image
+docker build -t splitmix .
+
+# Run the container
+docker run -d -p 8501:8501 --name splitmix splitmix
+
+# Stop the container
+docker stop splitmix
+docker rm splitmix
+```
+
+### Environment Variables
+
+You can customize the Streamlit configuration using environment variables:
+
+```yaml
+environment:
+  - STREAMLIT_SERVER_PORT=8501
+  - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+  - STREAMLIT_SERVER_HEADLESS=true
+```
+
+## Project Structure
+
+```
+splitmix/
+├── main.py              # Core splitting logic
+├── app.py               # Streamlit web interface
+├── downloader.py        # YouTube download wrapper
+├── pyproject.toml       # Python dependencies
+├── Dockerfile           # Docker image definition
+├── docker-compose.yml   # Docker Compose configuration
+├── .dockerignore        # Docker build exclusions
+└── README.md            # This file
+```
+
+## How It Works
+
+1. **Download**: Uses `yt-dlp` to download the best audio quality from YouTube and extract the thumbnail
+2. **Convert**: Converts audio to WAV format using FFmpeg (if needed)
+3. **Parse**: Reads timestamps and track names from your input
+4. **Split**: Uses `pydub` to slice the audio at each timestamp
+5. **Export**: Exports each track as 320kbps MP3 with metadata
+6. **Tag**: Uses `mutagen` to embed ID3 tags and cover art
+7. **Package**: Creates a ZIP file with all tracks for download
+8. **Cleanup**: Optionally deletes all working files
+
+## Troubleshooting
+
+### "Error loading audio file"
+- Ensure FFmpeg is installed and in your PATH
+- Try converting your audio file to WAV first
+
+### "Could not parse any tracks"
+- Check timestamp format (MM:SS or HH:MM:SS)
+- Ensure there's a space-dash-space ` - ` between timestamp and title
+- Make sure each timestamp is on a new line
+
+### Docker container won't start
+- Check if port 8501 is already in use: `lsof -i :8501`
+- View logs: `docker-compose logs -f`
+- Ensure FFmpeg is included in the Docker image
+
+### Download fails
+- Check your internet connection
+- Verify the YouTube URL is correct and the video is accessible
+- Some videos may be restricted or age-gated
+
+## Tips
+
+- For best results, use YouTube videos that have the tracklist in the description
+- The video title will auto-fill the Artist and Album fields, but you can edit them
+- Use descriptive track names - they'll appear in music players
+- Cover art is automatically extracted from the video thumbnail
+- The output folder will be created inside the `data/` directory when using the web interface
+
+## Development
+
+```bash
+# Install dependencies
+uv sync
+
+# Run locally
+uv run streamlit run app.py
+
+# Run CLI tests
+uv run python main.py "test.wav" --artist "Test" --album "Test" --tracklist "timestamps.txt"
+```
+
+## License
+
+MIT
+
+## Credits
+
+- Built with [Streamlit](https://streamlit.io/)
+- Audio processing by [pydub](https://github.com/jiaaro/pydub)
+- Metadata handling by [mutagen](https://mutagen.readthedocs.io/)
+- YouTube downloads by [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- Audio conversion by [FFmpeg](https://ffmpeg.org/)
